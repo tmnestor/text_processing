@@ -1,0 +1,145 @@
+# Search Patterns Configuration
+# ------------------------------
+# This YAML file defines patterns for categorizing sentences in a pandas DataFrame.
+# Each entry consists of a named dictionary with inclusion and optional exclusion rules.
+#
+# Structure:
+# - pattern_name:
+#     include:
+#       - "phrase1"
+#       - "phrase2"
+#     exclude:
+#       - "excluded_phrase1"
+#       - "excluded_phrase2"
+#
+# Rules:
+# 1. Each pattern must have at least one inclusion rule.
+# 2. Exclusion rules are optional.
+# 3. Patterns are applied in the order they appear in this file.
+# 4. The first matching pattern (inclusion matches & exclusion doesn't) will be applied.
+# 5. If no patterns match, the original sentence is kept unchanged.
+#
+# Note: All matches are case-insensitive.
+
+- animal_phrase:
+    include:
+      - "quick brown fox"
+      - "lazy dog"
+    exclude:
+      - "cat"
+      - "wolf"
+
+- journey_phrase:
+    include:
+      - "journey of a thousand miles"
+      - "single step"
+
+- shakespeare_phrase:
+    include:
+      - "to be or not to be"
+      - "that is the question"
+      - "wherefore art thou"
+
+- proverb:
+    include:
+      - "all that glitters"
+      - "is not gold"
+      - "a penny saved"
+      - "actions speak louder than words"
+
+- weather:
+    include:
+      - "raining cats and dogs"
+      - "under the weather"
+      - "cloud"
+      - "sunny"
+      - "storm"
+    exclude:
+      - "metaphorical"
+
+- technology:
+    include:
+      - "computer"
+      - "internet"
+      - "artificial intelligence"
+      - "machine learning"
+      - "blockchain"
+    exclude:
+      - "non-technical"
+
+- food:
+    include:
+      - "delicious"
+      - "recipe"
+      - "cuisine"
+      - "restaurant"
+      - "ingredient"
+    exclude:
+      - "non-edible"
+
+- sports:
+    include:
+      - "football"
+      - "basketball"
+      - "tennis"
+      - "olympics"
+      - "championship"
+    exclude:
+      - "metaphor"
+
+- music:
+    include:
+      - "melody"
+      - "rhythm"
+      - "concert"
+      - "musician"
+      - "song"
+    exclude:
+      - "silent"
+
+- education:
+    include:
+      - "school"
+      - "university"
+      - "learning"
+      - "student"
+      - "teacher"
+    exclude:
+      - "life lessons"
+
+# Example of a pattern with only inclusion rules
+- nature:
+    include:
+      - "forest"
+      - "mountain"
+      - "river"
+      - "ocean"
+      - "wildlife"
+
+# Example of a pattern with multiple exclusions
+- politics:
+    include:
+      - "government"
+      - "election"
+      - "policy"
+      - "democracy"
+    exclude:
+      - "office politics"
+      - "school election"
+      - "non-political"
+
+# Example of a pattern with regex-like phrases
+- numbers:
+    include:
+      - "\\d+ percent"
+      - "\\d+th century"
+      - "number \\d+"
+    exclude:
+      - "no numbers"
+
+# Example of a catch-all pattern (should be last)
+- miscellaneous:
+    include:
+      - "."  # Matches any non-empty string
+    exclude:
+      - "^$"  # Excludes empty strings

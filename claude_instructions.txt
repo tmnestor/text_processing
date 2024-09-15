@@ -1,0 +1,6 @@
+1. use python, regex compiliation (including structural pattern matching, if necessary) to
+read in a fully commented and highly structured yaml file comprised of a list of named dictionaries.
+2. each dictionary has a lists of search phases  for inclusion (one or more at a time) and lists of phrases for exclusion (none or more at a time) to be used when searching a pandas dataframe column of sentences.
+3. The yaml file should be read in by a separate function, the inclusion, exclusion rules should be assembled from the dictionary fields and compiled.
+4. As soon as the first named and compiled inclusion, exclusion pattern matches, the sentence is replaced with the name of the pattern (i.e. the dictionary name), and all remaining patterns are skipped. 
+5. However, when no dictionary pattern matches, the pandas record should be passed through unchanged.

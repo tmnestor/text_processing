@@ -1,0 +1,9 @@
+# Preprocessing Patterns
+# ---------------------
+# This YAML file defines regex patterns for text preprocessing.
+
+# Pattern to match non-alphabetic characters
+non_alpha: '[^a-zA-Z ]'
+
+# Pattern to match multiple consecutive spaces
+multiple_spaces: '\s+'

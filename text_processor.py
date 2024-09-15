@@ -48,7 +48,8 @@ def read_preprocessing_patterns(file_path: str) -> Dict[str, Pattern[str]]:
     
     return {key: re.compile(pattern) for key, pattern in yaml_data.items()}
 
-def preprocess_text(text: str, patterns: Dict[str, Pattern[str]]) -> str:
+def preprocess_text(text: str, 
+                    patterns: Dict[str, Pattern[str]]) -> str:
     """
     Preprocess the text using the provided patterns.
     
@@ -72,7 +73,8 @@ def preprocess_text(text: str, patterns: Dict[str, Pattern[str]]) -> str:
     return text.strip()
 
 def apply_patterns(df: pd.DataFrame, 
-                   column: str, patterns: List[Dict[str, Tuple[Pattern[str], Pattern[str] | None]]]) -> pd.DataFrame:
+                   column: str, 
+                   patterns: List[Dict[str, Tuple[Pattern[str], Pattern[str] | None]]]) -> pd.DataFrame:
     """
     Apply the compiled patterns to a pandas DataFrame column.
     

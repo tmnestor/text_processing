@@ -1,0 +1,10 @@
+regex_rules:
+  - pattern: '"'
+    description: 'strip quotes'
+    replace_with: ''
+  - pattern: '#'
+    description: 'strip hash symbols'
+    replace_with: ''
+  - pattern: "#\\d{2,}"
+    description: 'match hash followed by 2 or more digits'
+    replace_with: 'invoice_number'

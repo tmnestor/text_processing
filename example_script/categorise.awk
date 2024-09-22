@@ -1,21 +1,19 @@
 BEGIN {
-    FS = ","  # Set the field separator to comma
+    FS = ",";
+    OFS = ",";
 }
 
-# Read the header line
 NR == 1 {
-    next
+    print $0;
+    next;
 }
 
 {
-    categories[$2] = categories[$2] ? categories[$2] "," $1 : $1
+    data[$2] = (data[$2] ? data[$2] RS : "") $0;
 }
 
 END {
-    for (category in categories) {
-        split(categories[category], claims, ",")
-        for (i in claims) {
-            print category ": " claims[i]
-        }
+    for (label in data) {
+        print data[label];
     }
 }

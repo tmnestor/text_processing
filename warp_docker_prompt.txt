@@ -1,0 +1,6 @@
+I need a reproducible python environment for a project.
+I want to create a conda environment from my_env.yaml inside docker container prebuilt for running a jupyterlab notebook.
+Build container by extending jupyter/base-notebook:latest
+The  docker container is called my_env, and it has a jupyterlab notebook running on port 8888.
+The jupyter lab instance loads a notebook called my_notebook.ipynb on startup. The notebook should not need a token to load.
+I need the dockerfile artifact and a dummy my_env.yaml file created in ~/Desktop/my_docker_project

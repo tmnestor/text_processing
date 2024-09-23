@@ -1,127 +1,82 @@
 #!/bin/sh
-# preprocess.sh
 
 # Default values
-INPUT_CSV="default_input.csv"
-PREPROCESSED_CSV="default_preprocessed.csv"
-CATEGORY_CSV="default_category.csv"
-SORTED_CSV="default_sorted.csv"
-SAMPLE_CSV="default_sample.csv"
-SIZE=100
-LOGFILE="default_log.log"
+input_csv=""
+preprocessed_csv=""
+log_file=""
 
-# Function to log messages to both screen and log file
-log_message() {
-    echo "$1" | tee -a "$LOGFILE"
-}
+# Predefined values
+DEFAULT_INPUT=""
+DEFAULT_PREPROCESSED=""
+DEFAULT_LOG=""
 
-# Function to display help message
-show_help() {
+usage() {
     cat << EOF
-Usage: ${0##*/} [OPTIONS]
+Usage: $0 [OPTIONS]
+Options:
+  --input input_csv          Specify the input CSV file (default: $DEFAULT_INPUT)
+  --preprocessed preprocessed_csv
+                             Specify the preprocessed CSV file (default: $DEFAULT_PREPROCESSED)
+  --log log                  Specify the log file (default: $DEFAULT_LOG)
+  --help                     Display this help message and exit
 
-Preprocess CSV files with the following keyword arguments:
+Example:
+  $0 --input data.csv --preprocessed preprocessed.csv --log process.log
 
-  --input FILE              Input CSV file (default: $INPUT_CSV)
-  --preprocessed FILE       Preprocessed CSV file (default: $PREPROCESSED_CSV)
-  --category FILE           Category CSV file (default: $CATEGORY_CSV)
-  --sorted FILE             Sorted CSV file (default: $SORTED_CSV)
-  --sample FILE             Sample CSV file (default: $SAMPLE_CSV)
-  --size SIZE               Size parameter (default: $SIZE)
-  --log FILE                Log file (default: $LOGFILE)
-  -h, --help                Display this help and exit
-
-This script processes and manipulates CSV files based on the provided arguments.
+This script preprocesses a CSV file with the given options, logs the output, and tees feedback to screen and log file.
 EOF
 }
 
-# Parse arguments
-while [ $# -gt 0 ]; do
-    case $1 in
+# Function to tee feedback to screen and to log file
+tee_feedback() {
+    # Tee feedback to both stdout and the log file
+    echo "$1" | tee -a "$log_file"
+}
+
+# Argument parsing
+while [ "$#" -gt 0 ]; do
+    case "$1" in
         --input)
-            if [ -n "$2" ]; then
-                INPUT_CSV="$2"
-                shift
-            else
-                echo "Error: --input requires a value" >&2
-                exit 1
-            fi
+            input_csv="$2"
+            shift 2
             ;;
         --preprocessed)
-            if [ -n "$2" ]; then
-                PREPROCESSED_CSV="$2"
-                shift
-            else
-                echo "Error: --preprocessed requires a value" >&2
-                exit 1
-            fi
-            ;;
-        --category)
-            if [ -n "$2" ]; then
-                CATEGORY_CSV="$2"
-                shift
-            else
-                echo "Error: --category requires a value" >&2
-                exit 1
-            fi
-            ;;
-        --sorted)
-            if [ -n "$2" ]; then
-                SORTED_CSV="$2"
-                shift
-            else
-                echo "Error: --sorted requires a value" >&2
-                exit 1
-            fi
-            ;;
-        --sample)
-            if [ -n "$2" ]; then
-                SAMPLE_CSV="$2"
-                shift
-            else
-                echo "Error: --sample requires a value" >&2
-                exit 1
-            fi
-            ;;
-        --size)
-            if [ -n "$2" ]; then
-                SIZE="$2"
-                shift
-            else
-                echo "Error: --size requires a value" >&2
-                exit 1
-            fi
+            preprocessed_csv="$2"
+            shift 2
             ;;
         --log)
-            if [ -n "$2" ]; then
-                LOGFILE="$2"
-                shift
-            else
-                echo "Error: --log requires a value" >&2
-                exit 1
-            fi
+            log_file="$2"
+            shift 2
             ;;
-        -h|--help)
-            show_help
+        --help)
+            usage
             exit 0
             ;;
         *)
-            echo "Error: Invalid argument: $1" >&2
-            show_help
+            echo "Unknown option: $1"
+            usage
             exit 1
             ;;
     esac
-    shift
 done
 
-# Main processing logic can be implemented here
-log_message "Input CSV: $INPUT_CSV"
-log_message "Preprocessed CSV: $PREPROCESSED_CSV"
-log_message "Category CSV: $CATEGORY_CSV"
-log_message "Sorted CSV: $SORTED_CSV"
-log_message "Sample CSV: $SAMPLE_CSV"
-log_message "Size parameter: $SIZE"
-log_message "Log file: $LOGFILE"
+# Use default values if variables are empty
+input_csv="${input_csv:-$DEFAULT_INPUT}"
+preprocessed_csv="${preprocessed_csv:-$DEFAULT_PREPROCESSED}"
+log_file="${log_file:-$DEFAULT_LOG}"
 
-# Placeholder for processing actions
-# Implement your CSV processing logic here
+if [ -z "$input_csv" ] || [ -z "$preprocessed_csv" ] || [ -z "$log_file" ]; then
+    echo "Error: Missing required arguments."
+    usage
+    exit 1
+fi
+
+# Your script logic here, for example:
+tee_feedback "Processing input CSV: $input_csv"
+tee_feedback "Saving preprocessed CSV: $preprocessed_csv"
+tee_feedback "Logging to file: $log_file"
+
+# Example processing
+cp "$input_csv" "$preprocessed_csv" && tee_feedback "File processing completed successfully!"
+
+exit 0

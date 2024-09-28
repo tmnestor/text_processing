@@ -1,0 +1,16 @@
+text_preprocessor:
+  to_lowercase: true  # Convert text to lowercase
+  remove_punctuation: true  # Remove all punctuation marks from the text
+  remove_numbers: false  # Remove all numeric digits from the text
+  remove_stopwords: false  # Remove common stopwords from the text
+  stopwords:  # List of custom stopwords to remove (applicable if remove_stopwords is true)
+    - "is"
+    - "the"
+    - "and"
+  custom_replacements:  # List of custom replacement rules to apply to the text
+    - pattern: '\d{4}-\d{2}-\d{2}'  # A date pattern to replace
+    # - pattern: "\\d{4}-\\d{2}-\\d{2}"  # A date pattern to replace
+      replacement: "[DATE]"  # Replacement string for the date pattern
+    - pattern: "foo"  # A specific word to replace
+      replacement: "[EVENT]"  # Replacement string for the word
+

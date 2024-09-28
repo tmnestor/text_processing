@@ -1,113 +1,103 @@
-import re
-from typing import List, Dict, Tuple, Pattern, Any
-import pandas as pd
 import yaml
-
+import re
+import pandas as pd
+from typing import List, Dict, Tuple, Pattern, Any, Callable
 
 def read_yaml_patterns(file_path: str) -> List[Dict[str, Tuple[Pattern[str], Pattern[str] | None]]]:
     """
     Read and parse the YAML file containing search patterns.
-    
+
     Args:
     file_path (str): Path to the YAML file.
-    
+
     Returns:
     List[Dict[str, Tuple[Pattern[str], Pattern[str] | None]]]: List of dictionaries with compiled patterns.
     """
-    with open(file_path, 'r', encoding='utf-8') as file:
+    with open(file_path, 'r') as file:
         yaml_data = yaml.safe_load(file)
-    
+
     patterns: List[Dict[str, Tuple[Pattern[str], Pattern[str] | None]]] = []
     for item in yaml_data:
         name = list(item.keys())[0]
         rules = item[name]
-        
+
         # Compile inclusion patterns
         inclusion_pattern: Pattern[str] = re.compile('|'.join(rules['include']), re.IGNORECASE)
-        
+
         # Compile exclusion patterns (if any)
         exclusion_pattern: Pattern[str] | None = (
             re.compile('|'.join(rules['exclude']), re.IGNORECASE) if 'exclude' in rules else None
         )
-        
+
         patterns.append({name: (inclusion_pattern, exclusion_pattern)})
-    
+
     return patterns
 
 def read_preprocessing_patterns(file_path: str) -> Dict[str, Pattern[str]]:
     """
     Read and compile preprocessing patterns from a YAML file.
-    
+
     Args:
     file_path (str): Path to the YAML file.
-    
+
     Returns:
     Dict[str, Pattern[str]]: Dictionary of compiled preprocessing patterns.
     """
     with open(file_path, 'r') as file:
         yaml_data = yaml.safe_load(file)
-    
+
     return {key: re.compile(pattern) for key, pattern in yaml_data.items()}
 
-def preprocess_text(text: str, 
-                    patterns: Dict[str, Pattern[str]]) -> str:
+def preprocess_text(patterns: Dict[str, Pattern[str]]) -> Callable[[str], str]:
     """
-    Preprocess the text using the provided patterns.
-    
-    Args:
-    text (str): Input text to preprocess.
-    patterns (Dict[str, Pattern[str]]): Dictionary of compiled preprocessing patterns.
-    
-    Returns:
-    str: Preprocessed text.
-    """
-    # Convert to lowercase
-    text = text.lower()
-    
-    # Apply non-alpha pattern
-    text = patterns['non_alpha'].sub(' ', text)
-    
-    # Remove multiple whitespaces
-    text = patterns['multiple_spaces'].sub(' ', text)
-    
-    # Strip leading and trailing whitespace
-    return text.strip()
+    Create a preprocessing function using the provided patterns.
 
-def apply_patterns(df: pd.DataFrame, 
-                   column: str, 
-                   patterns: List[Dict[str, Tuple[Pattern[str], Pattern[str] | None]]]) -> pd.DataFrame:
-    """
-    Apply the compiled patterns to a pandas DataFrame column.
-    
     Args:
-    df (pd.DataFrame): Input DataFrame.
-    column (str): Name of the column to apply patterns to.
-    patterns (List[Dict[str, Tuple[Pattern[str], Pattern[str] | None]]]): List of compiled patterns.
-    
+    patterns (Dict[str, Pattern[str]]): Dictionary of compiled preprocessing patterns.
+
     Returns:
-    pd.DataFrame: DataFrame with applied patterns.
+    Callable[[str], str]: A function that preprocesses text according to the patterns.
     """
-    def match_patterns(sentence: str) -> str:
+    def wrapper(text: str) -> str:
+        # Convert to lowercase
+        text = text.lower()
+
+        # Apply non-alpha pattern
+        text = patterns['non_alpha'].sub(' ', text)
+
+        # Remove multiple whitespaces
+        text = patterns['multiple_spaces'].sub(' ', text)
+
+        # Strip leading and trailing whitespace
+        return text.strip()
+
+    return wrapper
+
+def apply_patterns(patterns: List[Dict[str, Tuple[Pattern[str], Pattern[str] | None]]]) -> Callable[[str], str]:
+    """
+    Create a function to apply patterns to text.
+
+    Args:
+    patterns (List[Dict[str, Tuple[Pattern[str], Pattern[str] | None]]]): List of compiled patterns.
+
+    Returns:
+    Callable[[str], str]: A function that applies patterns to text and returns the match.
+    """
+    def wrapper(sentence: str) -> str:
         for pattern_dict in patterns:
             name = list(pattern_dict.keys())[0]
             inclusion_pattern, exclusion_pattern = pattern_dict[name]
-            
+
             if inclusion_pattern.search(sentence):
                 if exclusion_pattern is None or not exclusion_pattern.search(sentence):
                     return name
         return sentence
 
-    df[column] = df[column].apply(match_patterns)
-    return df
+    return wrapper
 
-def calculate_display_value_counts(df: pd.DataFrame, 
-                                   column: str, 
-                                   normalize: bool = False, sort: bool = True) -> Dict[Any, Any]:
+def calculate_display_value_counts(df: pd.DataFrame, column: str, normalize: bool = False, sort: bool = True) -> Dict[Any, Any]:
     """
     Calculate and display value counts for a specified column in a DataFrame.
-
-    This function calculates the frequency of each unique value in the specified column,
-    optionally normalizes the counts, sorts the results, and displays them.
 
     Args:
     df (pd.DataFrame): The input DataFrame.
@@ -135,29 +125,34 @@ def calculate_display_value_counts(df: pd.DataFrame,
     try:
         # Calculate value counts
         value_counts = df[column].value_counts(normalize=normalize, sort=sort)
-        
+
         # Display the results
         print(f"Value counts for column '{column}':")
         print(value_counts)
-        
+
         # Return the results as a dictionary
         return value_counts.to_dict()
-    
+
     except KeyError:
         print(f"Error: Column '{column}' not found in the DataFrame.")
         return {}
-    
-    
+
 # Example usage
 if __name__ == "__main__":
     # Read preprocessing patterns
     preprocess_yaml_path = "preprocessing_patterns.yaml"
     preprocess_patterns = read_preprocessing_patterns(preprocess_yaml_path)
-    
+
     # Read search patterns
     search_yaml_path = "search_patterns.yaml"
     compiled_patterns = read_yaml_patterns(search_yaml_path)
-    
+
+    # Create preprocessing function
+    preprocess_fn = preprocess_text(preprocess_patterns)
+
+    # Create pattern application function
+    apply_fn = apply_patterns(compiled_patterns)
+
     # Create a sample DataFrame with more examples
     data: Dict[str, List[str]] = {
         'sentences': [
@@ -191,22 +186,16 @@ if __name__ == "__main__":
         ]
     }
     df = pd.DataFrame(data)
-    
-    # Preprocess the sentences
-    df['preprocessed'] = df['sentences'].apply(lambda x: preprocess_text(x, preprocess_patterns))
-    
-    # Apply patterns to the preprocessed DataFrame
-    result_df = apply_patterns(df, 'preprocessed', compiled_patterns)
-    
 
-    # Display results with original and preprocessed sentences
-    # result_df['original'] = data['sentences']
+    # Preprocess the sentences
+    df['preprocessed'] = df['sentences'].apply(preprocess_fn)
+
+    # Apply patterns to the preprocessed DataFrame
+    result_df = df.copy()
+    result_df['preprocessed'] = result_df['preprocessed'].apply(apply_fn)
+
     print("\nDetailed results:")
     print(result_df[['sentences', 'preprocessed']])
-    # Calculate and display value counts for the 'sentences' column (which now contains the categories)
-    # category_counts = calculate_display_value_counts(result_df, 'preprocessed')
-    
-    # Optionally, you can also calculate normalized counts
+
+    # Calculate and display value counts for the 'preprocessed' column
     category_proportions = calculate_display_value_counts(result_df, 'preprocessed', normalize=True)
-    # print("\nCategory Proportions:")
-    # print(category_proportions)

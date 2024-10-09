@@ -79,7 +79,7 @@ def main():
     and clean a sample text.
     """
     # Read configuration from YAML file
-    with open('config.yaml', 'r') as file:
+    with open('config.yaml', 'r', encoding='utf-8') as file:
         config: Dict[str, Any] = yaml.safe_load(file)
 
     # Create the preprocessor object using the configuration from the YAML file

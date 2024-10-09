@@ -1,5 +1,5 @@
 %.words: %
-	< $< tr -d '[:punct:]' | tr '\n\r' ' ' | tr -s '[:space:]' |         tr '[:space:]' '\n' > $@
+	< $< tr -d '[:punct:]' | tr '\n\r' ' ' | tr -s '[:space:]' | tr '[:space:]' '\n' > $@
 
 %.sorted: %
 	< $< sort > $@

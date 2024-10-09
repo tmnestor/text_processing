@@ -21,7 +21,6 @@ import string
 from typing import List, Dict, Any
 import yaml
 
-
 class TextPreprocessor:
     """
     A class to preprocess text based on a configuration.
@@ -59,24 +58,43 @@ class TextPreprocessor:
         Returns:
             str: The cleaned text.
         """
+
+        if not isinstance(text, str):
+            return ""
+
         if self.to_lowercase:
             text = text.lower()
+            
         for replacement in self.custom_replacements:
             pattern: str = replacement['pattern']
             repl: str = replacement['replacement']
             text = re.sub(pattern, repl, text)
+        # text = re.sub(
+        #     '|'.join(re.escape(rep['pattern']) for rep in self.custom_replacements),
+        #     lambda m: next(rep['replacement'] for rep in self.custom_replacements if re.fullmatch(rep['pattern'], m.group())),
+        #     text
+        # )
         if self.remove_punctuation:
             text = re.sub(f"[{re.escape(string.punctuation)}]", "", text)
+            
         if self.remove_numbers:
             text = re.sub(r"\d+", "", text)
+            
         if self.remove_stopwords:
             text = " ".join([word for word in text.split() if word not in self.stopwords])
+        # if self.remove_stopwords:
+        #     text = " ".join(word for word in text.split() if word not in self.stopwords)
+        
         return text
-
+    
 def main():
     """
     Main function to read configuration from YAML, create the TextPreprocessor, 
     and clean a sample text.
+    
+    This function handles the reading of the configuration file, initializes the 
+    TextPreprocessor with the loaded settings, and demonstrates the cleaning 
+    process on a sample text.
     """
     # Read configuration from YAML file
     with open('config.yaml', 'r', encoding='utf-8') as file:
